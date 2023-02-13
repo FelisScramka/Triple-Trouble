@@ -10,7 +10,6 @@ class Tilemap():
         
         self.data = {}
         
-        self.hitboxs = {}
         self.types = {}
         
         self.size = [size_x, size_y]
@@ -18,12 +17,20 @@ class Tilemap():
         self.hitbox = Hitbox(x, y, 0, 0)
 
     #Add tile type
-    def addType(self, name, color, image, typet = 0):
-        self.types[name] = {"color": color, "image": image, "type": typet, "tiles": {}}
+    def addType(self, name, color, image, typet = 0, hitbox = [0, 0, 0, 0]):
+        if hitbox[2] == 0:
+            hitbox[2] = self.size[0]
+        if hitbox[3] == 0:
+            hitbox[3] = self.size[1]
+        self.types[name] = {"color": color, "image": image, "type": typet, "tiles": {}, "hitbox": hitbox}
 
     #Add tile to type
-    def addTile(self, name, ttype, image):
-        self.types[name]["tiles"][ttype] = image
+    def addTile(self, name, ttype, image, hitbox = [0, 0, 0, 0]):
+        if hitbox[2] == 0:
+            hitbox[2] = self.size[0]
+        if hitbox[3] == 0:
+            hitbox[3] = self.size[1]
+        self.types[name]["tiles"][ttype] = [image, hitbox]
 
     #Update the data                            
     def write(self):
@@ -101,19 +108,20 @@ class Tilemap():
                         tiletype = "E"
 
                     try:
-                        image = tile["tiles"][tiletype]
+                        image = tile["tiles"][tiletype][0]
+                        hitbox = tile["tiles"][tiletype][1]
                     except:
                         image = tile["image"]
+                        hitbox = tile["hitbox"]
 
                     if tiletype == "E":
                         image = tile["image"]
                         
-                    self.data[(x, y)] = {"pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image}
-                    self.hitboxs[(x, y)] = Hitbox(x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y, self.size[0], self.size[1])
+                    self.data[(x, y)] = {"render_pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image, "hitbox": Hitbox(x * self.size[0] + self.hitbox.x + hitbox[0], y * self.size[1] + self.hitbox.y + hitbox[1], hitbox[2], hitbox[3]), "type": c}
                     
     def draw(self, screen, offset = [0, 0]):
         for dat in self.data.values():
-            screen.blit(dat["sprite"], (dat["pos"][0] + offset[0], dat["pos"][1] + offset[1]))
+            screen.blit(dat["sprite"], (dat["render_pos"][0] + offset[0], dat["render_pos"][1] + offset[1]))
             
     def setPos(self, x, y):
         for dat in self.data.values():
