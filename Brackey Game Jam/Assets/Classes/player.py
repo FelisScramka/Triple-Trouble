@@ -5,7 +5,7 @@ from Assets.Classes.hitbox import Hitbox
 
 class Player():
     def __init__(self, hitbox = Hitbox(0, 0, 64, 64), vel = Vector2()):
-        self.sprite = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Square1.png"), (64, 64))
+        self.sprite = pygame.image.load("Assets/Sprites/Player/Square1.png")
         self.hitbox = hitbox
 
         self.grounded = False

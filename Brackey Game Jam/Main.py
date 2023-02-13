@@ -2,8 +2,8 @@ import pygame, sys, time
 
 from pygame.math import Vector2
 
-import Assets.Classes.player as player
-import Assets.Classes.tilemap as tilemap
+from Assets.Classes.player import Player
+from Assets.Classes.tilemap import Tilemap
 import Assets.Sprites.data as imgdata
 
 pygame.init()
@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 
 last_t = time.time()
 
-tm = tilemap.Tilemap(pygame.image.load("Assets/Maps/Map1.png"), 0, 0, 64, 64)
+tm = Tilemap(pygame.image.load("Assets/Maps/Map1.png"), 0, 0, 64, 64)
 
 tm.addType("gr", (255, 255, 255), imgdata.gr4)
 
@@ -29,14 +29,14 @@ tm.addTile("gr", "TL", imgdata.gr8)
 
 tm.write()
 
-p = player.Player()
+player = Player()
 
-p.add_ani("idle_sqr", imgdata.idle_sqr_frames)
-p.add_ani("idle_tri", imgdata.idle_tri_frames)
-p.add_ani("idle_cir", imgdata.idle_cir_frames)
+player.add_ani("idle_sqr", imgdata.idle_sqr_frames)
+player.add_ani("idle_tri", imgdata.idle_tri_frames)
+player.add_ani("idle_cir", imgdata.idle_cir_frames)
 
-p.set_act("idle")
-p.type = "sqr"
+player.set_act("idle")
+player.type = "sqr"
 
 j_bf = 0
 _j_bf = 4
@@ -60,20 +60,20 @@ while True:
             if event.key == pygame.K_SPACE:
                 j_bf = _j_bf
                 
-    p.jump(j_bf)
+    player.jump(j_bf)
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_a] and p.walled != -1:
-        p.vel = lerp(p.vel, Vector2(-4.4, p.vel.y), 0.4)
-    if keys[pygame.K_d] and p.walled != 1:
-        p.vel = lerp(p.vel, Vector2(4.4, p.vel.y), 0.4)
+    if keys[pygame.K_a] and player.walled != -1:
+        player.vel = lerp(player.vel, Vector2(-4.4, player.vel.y), 0.4)
+    if keys[pygame.K_d] and player.walled != 1:
+        player.vel = lerp(player.vel, Vector2(4.4, player.vel.y), 0.4)
 
-    p.move_x(dt, tm.hitboxs.values())
-    p.move_y(dt, tm.hitboxs.values())
+    player.move_x(dt, tm.hitboxs.values())
+    player.move_y(dt, tm.hitboxs.values())
 
-    p.ani()
+    player.ani()
 
-    p.draw(screen)
+    player.draw(screen)
     tm.draw(screen)
 
     clock.tick(60)
