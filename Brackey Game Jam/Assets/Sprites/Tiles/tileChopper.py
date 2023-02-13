@@ -4,6 +4,7 @@ offset = 0
 size = 32
 
 image = input("Enter name of the image that you wanna chop: ") + ".png"
+folder = input("Enter folder you want your tile to be save in: ")
 name = input("Enter your output file name: ")
 
 def slice(surface, x_size, y_size):
@@ -35,6 +36,6 @@ for index, sprite in enumerate(slice(pygame.image.load(image), 16, 16)):
             save = True
             break
     if save:
-        pygame.image.save(pygame.transform.scale(sprite, (size, size)), f"Gr/{name}{index - offset}.png")
+        pygame.image.save(pygame.transform.scale(sprite, (size, size)), f"{folder}/{name}{index - offset}.png")
     else:
         offset += 1
