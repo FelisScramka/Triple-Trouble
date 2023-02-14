@@ -4,7 +4,10 @@ from pygame.math import Vector2
 
 import Assets.Classes.player as player
 import Assets.Classes.tilemap as tilemap
+import Assets.Classes.level as level
 import Assets.Sprites.data as imgdata
+
+from Assets.Classes.hitbox import Hitbox
 
 pygame.init()
 
@@ -13,7 +16,7 @@ clock = pygame.time.Clock()
 
 last_t = time.time()
 
-tm = tilemap.Tilemap(pygame.image.load("Assets/Maps/Map1.png"), 0, 0, imgdata.tile_sz[0], imgdata.tile_sz[1])
+tm = level.Level(pygame.image.load("Assets/Maps/Map1.png"), 0, 0, imgdata.tile_sz[0], imgdata.tile_sz[1], Vector2(0, 0))
 
 tm.addType("gr", (255, 255, 255), imgdata.gr15)
 
@@ -43,12 +46,14 @@ tm.addType("btn", (255, 0, 0), imgdata.btn0, 1)
 tm.addTile("btn", "DLT", imgdata.btn0, [36, 12, 12, 24])
 tm.addTile("btn", "TRD", imgdata.btn1, [0, 12, 12, 24])
 
-tm.addType("spkt", (240, 240, 240), imgdata.spk3, 1, [1, 0, 46, 7])
-tm.addType("spkd", (225, 225, 225), imgdata.spk2, 1, [1, 41, 46, 7])
-tm.addType("spkl", (210, 210, 210), imgdata.spk1, 1, [0, 1, 7, 47])
-tm.addType("spkr", (195, 195, 195), imgdata.spk0, 1, [46, 1, 7, 47])
+tm.addType("spkt", (240, 240, 240), imgdata.spk3, 1, [1, 0, 46, 7], "kill")
+tm.addType("spkd", (225, 225, 225), imgdata.spk2, 1, [1, 41, 46, 7], "kill")
+tm.addType("spkl", (210, 210, 210), imgdata.spk1, 1, [0, 1, 7, 47], "kill")
+tm.addType("spkr", (195, 195, 195), imgdata.spk0, 1, [46, 1, 7, 47], "kill")
 
 tm.write()
+
+tm.buttons.append([tm.data[(9, 2)]["hitbox"], 5, 0])
 
 p = player.Player()
 
@@ -85,22 +90,34 @@ while True:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] and p.walled != -1:
-        p.vel = lerp(p.vel, Vector2(-4.8, p.vel.y), 0.4)
+        p.vel = lerp(p.vel, Vector2(-5.2, p.vel.y), 0.4)
         p.set_act("run")
     if keys[pygame.K_d] and p.walled != 1:
-        p.vel = lerp(p.vel, Vector2(4.8, p.vel.y), 0.4)
+        p.vel = lerp(p.vel, Vector2(5.2, p.vel.y), 0.4)
         p.set_act("run")
     if not keys[pygame.K_a] and not keys[pygame.K_d]:
         p.set_act("idle")
 
-    p.update(dt, j_bf, tm.data.values())
+    p.move_x(dt)
+    tm.check_btn(p.hitbox)
+    p.collide_x(tm.origin, tm.data.values())
 
-    p.ani()
+    p.move_y(dt)
+    tm.check_btn(p.hitbox)
+    p.collide_y(tm.origin, tm.data.values())
+
+    p.update(j_bf)
     
-    #for hb in tm.hitboxs.values():
-        #pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(hb.x, hb.y, hb.w, hb.h))
+    for hb in tm.data.keys():
+        if tm.data[hb]["type"] == "air":
+            continue
+        hit = tm.data[hb]["hitbox"]
+        pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(hit.x, hit.y, hit.w, hit.h))
+
+    tm.update(p, dt)
 
     p.draw(screen)
+    p.draw_body(screen)
     tm.draw(screen)
 
     clock.tick(60)

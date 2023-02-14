@@ -6,7 +6,7 @@ import Assets.Sprites.data as imgdata
 
 class Player():
     def __init__(self, hitbox = Hitbox(0, 0, 0, 0), vel = Vector2()):
-        self.sprite = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Square1.png"), (64, 64))
+        self.sprite = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Square1.png"), (48, 48))
         self.hitbox = hitbox
         
         self.hitbox.w = imgdata.tile_sz[0]
@@ -37,7 +37,7 @@ class Player():
 
     def draw_body(self, screen):
         for b in self.body:
-            screen.blit(self.sprite, (self.hitbox.x, self.hitbox.y))
+            screen.blit(self.sprite, (b[0].x, b[0].y))
 
     def add_ani(self, act, sprites):
         self.anis[act] = sprites
@@ -51,7 +51,7 @@ class Player():
         self.act = act
         self.ani_i = 0
     
-    def move_x(self, dt, hitboxs = []):
+    def move_x(self, dt):
         if self.grounded:
             self.vel.x *= 0.83
         else:
@@ -59,39 +59,53 @@ class Player():
         
         self.hitbox.x += self.vel.x * dt
 
+    def collide_x(self, origin, hitboxs = []):
         self.walled = 0
         for hb in hitboxs:
+            if hb["type"] == "air":
+                continue
             hit = hb["hitbox"]
             collide = hit.collide(self.hitbox)
             if collide:
-                """
-                if collide
-                check if BUTTON
-                if YES:
-                if NORMAL BLOCK:
-                - append coors and the vels into a list in level var
-                - when level update increase the vels and also change coors in
-                tilemap
-                if DOORS:
-                - spawn lots of particles and make door disappear
-                """
+                if hb["type"] == "kill":
+                    self.die(origin)
                 if self.vel.x < 0:
                     self.hitbox.x = hit.x + hit.w
                     self.walled = -1
                 elif self.vel.x >= 0:
                     self.hitbox.x = hit.x - self.hitbox.w
                     self.walled = 1
+                    
+        for b in self.body:
+            if self.hitbox.collide(b[0]):
+                if self.vel[0] < 0:
+                    self.vel[0] = -0.006
+                    self.hitbox.x = b[0].x + b[0].w
+                    self.walled = -1
+                elif self.vel[0] >= 0:
+                    self.vel[0] = 0.006
+                    self.hitbox.x = b[0].x - self.hitbox.w
+                    self.walled = 1
 
-    def move_y(self, dt, hitboxs = []):
+    def move_y(self, dt):
         self.vel.y = min(self.vel.y + 0.61 * dt, 14.1)
         self.hitbox.y += self.vel.y * dt
-        
+
+        for b in self.body:
+            b[0].add(0, b[1].y)
+            b[1].y = min(b[1].y + 0.61 * dt, 14.1)
+
+    def collide_y(self, origin, hitboxs = []):
         self.gr_bf -= 1
         self.grounded = False
         for hb in hitboxs:
+            if hb["type"] == "air":
+                continue
             hit = hb["hitbox"]
             collide = hit.collide(self.hitbox)
             if collide:
+                if hb["type"] == "kill":
+                    self.die(origin)
                 if self.vel[1] < 0:
                     self.vel[1] = -0.006
                     self.hitbox.y = hit.y + hit.h
@@ -100,11 +114,28 @@ class Player():
                     self.hitbox.y = hit.y - self.hitbox.h
                     self.grounded = True
                     self.gr_bf = self._gr_bf
+            for b in self.body:
+                collide = hit.collide(b[0])
+                if collide:
+                    if b[1].y < 0:
+                        b[1].y = 0
+                        b[0].y = hit.y + hit.h
+                    elif b[1].y >= 0:
+                        b[1].y = 0
+                        b[0].y = hit.y - b[0].h
+                        
+        for b in self.body:
+            if self.hitbox.collide(b[0]):
+                if self.vel[1] < 0:
+                    self.vel[1] = -0.006
+                    self.hitbox.y = b[0].y + b[0].h
+                elif self.vel[1] >= 0:
+                    self.vel[1] = 0.006
+                    self.hitbox.y = b[0].y - self.hitbox.h
+                    self.grounded = True
+                    self.gr_bf = self._gr_bf
 
-    def update(self, dt, j_bf, hitboxs = []):
-        self.move_x(dt, hitboxs)
-        self.move_y(dt, hitboxs)
-
+    def update(self, j_bf):
         if self.walled:
             if self.vel.y > 0:
                 self.vel.y *= 0.86
@@ -118,7 +149,10 @@ class Player():
             self.vel[1] = -10.1
 
     def die(self, org_pos):
-        self.body.append(self.hitbox)
+        self.body.append([Hitbox(self.hitbox.x, self.hitbox.y, self.hitbox.w, self.hitbox.h), Vector2(0, 0)])
         
         self.hitbox.x = org_pos.x
         self.hitbox.y = org_pos.y
+        
+        self.vel.x = 0
+        self.vel.y = 0

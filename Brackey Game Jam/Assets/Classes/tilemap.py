@@ -17,12 +17,12 @@ class Tilemap():
         self.hitbox = Hitbox(x, y, 0, 0)
 
     #Add tile type
-    def addType(self, name, color, image, typet = 0, hitbox = [0, 0, 0, 0]):
+    def addType(self, name, color, image, typet = 0, hitbox = [0, 0, 0, 0], tag = "normal"):
         if hitbox[2] == 0:
             hitbox[2] = self.size[0]
         if hitbox[3] == 0:
             hitbox[3] = self.size[1]
-        self.types[name] = {"color": color, "image": image, "type": typet, "tiles": {}, "hitbox": hitbox}
+        self.types[name] = {"color": color, "image": image, "type": typet, "tiles": {}, "hitbox": hitbox, "tag": tag}
 
     #Add tile to type
     def addTile(self, name, ttype, image, hitbox = [0, 0, 0, 0]):
@@ -46,7 +46,7 @@ class Tilemap():
         for y in range(self.map.get_height()):
             for x in range(self.map.get_width()):
                 c = self.map.get_at((x, y))
-                self.hitboxs[(x, y)] = Hitbox(0, 0, 0, 0)
+                self.data[(x, y)] = {"type": "air"}
                 
                 for tile in self.types.values():
                     if c != tile["color"]:
@@ -117,10 +117,12 @@ class Tilemap():
                     if tiletype == "E":
                         image = tile["image"]
                         
-                    self.data[(x, y)] = {"render_pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image, "hitbox": Hitbox(x * self.size[0] + self.hitbox.x + hitbox[0], y * self.size[1] + self.hitbox.y + hitbox[1], hitbox[2], hitbox[3]), "type": c}
+                    self.data[(x, y)] = {"render_pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image, "hitbox": Hitbox(x * self.size[0] + self.hitbox.x + hitbox[0], y * self.size[1] + self.hitbox.y + hitbox[1], hitbox[2], hitbox[3]), "type": tile["tag"]}
                     
     def draw(self, screen, offset = [0, 0]):
         for dat in self.data.values():
+            if dat["type"] == "air":
+                continue
             screen.blit(dat["sprite"], (dat["render_pos"][0] + offset[0], dat["render_pos"][1] + offset[1]))
             
     def setPos(self, x, y):
