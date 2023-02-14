@@ -26,12 +26,18 @@ class Player():
         self.anis = {"idle": [self.sprite]}
         self.ani_i = 0
 
+        self.body = []
+
     def draw(self, screen):
         try:
             image = self.anis[self.act + "_" + self.type][self.ani_i]
         except:
             image = self.sprite
         screen.blit(image, (self.hitbox.x, self.hitbox.y))
+
+    def draw_body(self, screen):
+        for b in self.body:
+            screen.blit(self.sprite, (self.hitbox.x, self.hitbox.y))
 
     def add_ani(self, act, sprites):
         self.anis[act] = sprites
@@ -110,3 +116,9 @@ class Player():
     def jump(self, j_bf):
         if self.gr_bf > 0 and j_bf > 0:
             self.vel[1] = -10.1
+
+    def die(self, org_pos):
+        self.body.append(self.hitbox)
+        
+        self.hitbox.x = org_pos.x
+        self.hitbox.y = org_pos.y
