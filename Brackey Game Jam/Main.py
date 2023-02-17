@@ -24,7 +24,7 @@ lvl_id = [1]
 
 tm = copy.copy(eval(f"lvl_dat.lvl{lvl_id[0]}"))
 
-p = player.Player()
+p = player.Player(tm)
 
 p.add_ani("idle_sqr", imgdata.idle_sqr_frames)
 p.add_ani("idle_tri", imgdata.idle_tri_frames)

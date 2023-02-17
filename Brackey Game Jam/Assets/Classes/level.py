@@ -29,6 +29,12 @@ class Level(tilemap.Tilemap):
     def add_btn(self, cords, target):
         self.buttons.append([self.data[cords]["hitbox"], target, False])
     
+    def __str__(self) -> str:
+        return self.__dict__.__str__()
+    
+    def __repr__(self) -> str:
+        return self.__dict__.__repr__()
+
     def update(self, p, dt):
         rem_l = []
         for t in self.falling.keys():

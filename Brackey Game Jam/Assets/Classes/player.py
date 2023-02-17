@@ -8,7 +8,7 @@ import Assets.Sprites.data as imgdata
 import copy
 
 class Player():
-    def __init__(self, hitbox = Hitbox(0, 0, 0, 0), vel = Vector2()):
+    def __init__(self, tm, hitbox = Hitbox(0, 0, 0, 0), vel = Vector2()):
         self.sprite = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Square1.png"), (48, 48))
         self.hitbox = hitbox
         
@@ -17,6 +17,7 @@ class Player():
 
         self.grounded = False
         self.walled = False
+        self.tm = tm
         
         self.gr_bf = 0
         self._gr_bf = 2
@@ -188,7 +189,7 @@ class Player():
         self.body = []
         self.dths = 0
 
-        lvl = copy.copy(eval(f"lvl_dat.lvl{lvl_id[0]}"))
+        self.tm = copy.copy(eval(f"lvl_dat.lvl{lvl_id[0]}"))
 
     def die(self, org_pos, lvl, lvl_i):
         self.body.append([Hitbox(self.hitbox.x, self.hitbox.y, self.hitbox.w, self.hitbox.h), Vector2(0, 0)])
