@@ -17,19 +17,19 @@ class Tilemap():
         self.hitbox = Hitbox(x, y, 0, 0)
 
     #Add tile type
-    def addType(self, name, color, image, typet = 0, hitbox = [0, 0, 0, 0], tag = "normal"):
+    def addType(self, name, color, image, typet = 0, hitbox = [1, 1, 0, 0], tag = "normal"):
         if hitbox[2] == 0:
-            hitbox[2] = self.size[0]
+            hitbox[2] = self.size[0] - 2
         if hitbox[3] == 0:
-            hitbox[3] = self.size[1]
+            hitbox[3] = self.size[1] - 2
         self.types[name] = {"color": color, "image": image, "type": typet, "tiles": {}, "hitbox": hitbox, "tag": tag}
 
     #Add tile to type
-    def addTile(self, name, ttype, image, hitbox = [0, 0, 0, 0]):
+    def addTile(self, name, ttype, image, hitbox = [1, 1, 0, 0]):
         if hitbox[2] == 0:
-            hitbox[2] = self.size[0]
+            hitbox[2] = self.size[0] - 2
         if hitbox[3] == 0:
-            hitbox[3] = self.size[1]
+            hitbox[3] = self.size[1] - 2
         self.types[name]["tiles"][ttype] = [image, hitbox]
 
     #Update the data                            
@@ -117,7 +117,7 @@ class Tilemap():
                     if tiletype == "E":
                         image = tile["image"]
                         
-                    self.data[(x, y)] = {"render_pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image, "hitbox": Hitbox(x * self.size[0] + self.hitbox.x + hitbox[0], y * self.size[1] + self.hitbox.y + hitbox[1], hitbox[2], hitbox[3]), "type": tile["tag"]}
+                    self.data[(x, y)] = {"render_pos": [x * self.size[0] + self.hitbox.x, y * self.size[1] + self.hitbox.y], "sprite": image, "hitbox": Hitbox(x * self.size[0] + self.hitbox.x + hitbox[0], y * self.size[1] + self.hitbox.y + hitbox[1], hitbox[2], hitbox[3]), "type": tile["tag"], "place": tiletype}
                     
     def draw(self, screen, offset = [0, 0]):
         for dat in self.data.values():

@@ -2,7 +2,10 @@ import pygame, math
 from pygame.math import Vector2
 
 from Assets.Classes.hitbox import Hitbox
+import Assets.Classes.lvl_dat as lvl_dat
 import Assets.Sprites.data as imgdata
+
+import copy
 
 class Player():
     def __init__(self, hitbox = Hitbox(0, 0, 0, 0), vel = Vector2()):
@@ -20,6 +23,9 @@ class Player():
         
         self.vel = vel
 
+        self.shapes = ["sqr", "tri", "cir"]
+        self.s_i = 0
+
         self.type = "sqr"
 
         self.act = "idle"
@@ -27,6 +33,7 @@ class Player():
         self.ani_i = 0
 
         self.body = []
+        self.dths = 0
 
     def draw(self, screen):
         try:
@@ -59,8 +66,9 @@ class Player():
         
         self.hitbox.x += self.vel.x * dt
 
-    def collide_x(self, origin, hitboxs = []):
+    def collide_x(self, origin, lvl, lvl_i, hitboxs = []):
         self.walled = 0
+        d = False
         for hb in hitboxs:
             if hb["type"] == "air":
                 continue
@@ -68,7 +76,10 @@ class Player():
             collide = hit.collide(self.hitbox)
             if collide:
                 if hb["type"] == "kill":
-                    self.die(origin)
+                    d = True
+                elif hb["type"] == "pt":
+                    lvl_i[0] += 1
+                    self.reset(origin, lvl, lvl_i)
                 if self.vel.x < 0:
                     self.hitbox.x = hit.x + hit.w
                     self.walled = -1
@@ -86,6 +97,8 @@ class Player():
                     self.vel[0] = 0.006
                     self.hitbox.x = b[0].x - self.hitbox.w
                     self.walled = 1
+        if d:
+            self.die(origin, lvl, lvl_i)
 
     def move_y(self, dt):
         self.vel.y = min(self.vel.y + 0.61 * dt, 14.1)
@@ -95,9 +108,10 @@ class Player():
             b[0].add(0, b[1].y)
             b[1].y = min(b[1].y + 0.61 * dt, 14.1)
 
-    def collide_y(self, origin, hitboxs = []):
+    def collide_y(self, origin, lvl, lvl_i, hitboxs = []):
         self.gr_bf -= 1
         self.grounded = False
+        d = False
         for hb in hitboxs:
             if hb["type"] == "air":
                 continue
@@ -105,7 +119,10 @@ class Player():
             collide = hit.collide(self.hitbox)
             if collide:
                 if hb["type"] == "kill":
-                    self.die(origin)
+                    d = True
+                elif hb["type"] == "pt":
+                    lvl_i[0] += 1
+                    self.reset(origin, lvl, lvl_i)
                 if self.vel[1] < 0:
                     self.vel[1] = -0.006
                     self.hitbox.y = hit.y + hit.h
@@ -134,6 +151,8 @@ class Player():
                     self.hitbox.y = b[0].y - self.hitbox.h
                     self.grounded = True
                     self.gr_bf = self._gr_bf
+        if d:
+            self.die(origin, lvl, lvl_i)
 
     def update(self, j_bf):
         if self.walled:
@@ -146,9 +165,32 @@ class Player():
     
     def jump(self, j_bf):
         if self.gr_bf > 0 and j_bf > 0:
-            self.vel[1] = -10.1
+            self.vel[1] = -10.6
 
-    def die(self, org_pos):
+    def reset(self, org_pos, lvl, lvl_id):
+        self.hitbox = Hitbox(org_pos.x, org_pos.y)
+        
+        self.hitbox.w = imgdata.tile_sz[0]
+        self.hitbox.h = imgdata.tile_sz[1]
+
+        self.grounded = False
+        self.walled = False
+        
+        self.gr_bf = 0
+        self._gr_bf = 2
+        
+        self.vel = Vector2()
+
+        self.s_i = 0
+
+        self.type = "sqr"
+
+        self.body = []
+        self.dths = 0
+
+        lvl = copy.copy(eval(f"lvl_dat.lvl{lvl_id[0]}"))
+
+    def die(self, org_pos, lvl, lvl_i):
         self.body.append([Hitbox(self.hitbox.x, self.hitbox.y, self.hitbox.w, self.hitbox.h), Vector2(0, 0)])
         
         self.hitbox.x = org_pos.x
@@ -156,3 +198,12 @@ class Player():
         
         self.vel.x = 0
         self.vel.y = 0
+
+        self.s_i = (self.s_i + 1) % 3
+        self.type = self.shapes[self.s_i]
+
+        self.dths += 1
+
+        if self.dths == 3:
+            self.reset(org_pos, lvl, lvl_i)
+

@@ -15,10 +15,16 @@ tri_idle_2 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Tri
 tri_idle_3 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Triangle3.png"), tile_sz)
 tri_idle_4 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Triangle4.png"), tile_sz)
 
+tri_run_1 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/TriangleRun1.png"), tile_sz)
+tri_run_2 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/TriangleRun2.png"), tile_sz)
+
 cir_idle_1 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Sphere1.png"), tile_sz)
 cir_idle_2 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Sphere2.png"), tile_sz)
 cir_idle_3 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Sphere3.png"), tile_sz)
 cir_idle_4 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/Sphere4.png"), tile_sz)
+
+cir_run_1 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/SphereRun1.png"), tile_sz)
+cir_run_2 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Player/SphereRun2.png"), tile_sz)
 
 idle_sqr_frames = []
 
@@ -49,6 +55,13 @@ for i in range(10):
 for i in range(10):
     idle_tri_frames.append(tri_idle_4)
 
+run_tri_frames = []
+
+for i in range(8):
+    run_tri_frames.append(tri_run_1)
+for i in range(8):
+    run_tri_frames.append(tri_run_2)
+
 idle_cir_frames = []
 
 for i in range(10):
@@ -59,6 +72,13 @@ for i in range(10):
     idle_cir_frames.append(cir_idle_3)
 for i in range(10):
     idle_cir_frames.append(cir_idle_4)
+
+run_cir_frames = []
+
+for i in range(8):
+    run_cir_frames.append(cir_run_1)
+for i in range(8):
+    run_cir_frames.append(cir_run_2)
 
 gr0 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Gr/0.png"), tile_sz)
 gr1 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Gr/1.png"), tile_sz)
@@ -88,3 +108,10 @@ spk0 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Spk/0.png"
 spk1 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Spk/1.png"), tile_sz)
 spk2 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Spk/2.png"), tile_sz)
 spk3 = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Spk/3.png"), tile_sz)
+
+dr = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Dr/0.png"), tile_sz)
+drsqr = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Dr/1.png"), tile_sz)
+drcir = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Dr/2.png"), tile_sz)
+drtri = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Dr/3.png"), tile_sz)
+
+pt = pygame.transform.scale(pygame.image.load("Assets/Sprites/Tiles/Pt/0.png"), tile_sz)
