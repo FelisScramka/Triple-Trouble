@@ -1,5 +1,6 @@
-import pygame, sys, time
-
+import pygame as pg
+import sys, time
+import asyncio
 import copy
 
 from pygame.math import Vector2
@@ -13,92 +14,102 @@ import Assets.Sprites.data as imgdata
 
 import Assets.Classes.lvl_dat as lvl_dat
 
-pygame.init()
-
-screen = pygame.display.set_mode((800, 800))
-clock = pygame.time.Clock()
-
-last_t = time.time()
-
-lvl_id = [1]
-
-tm = copy.copy(eval(f"lvl_dat.lvl{lvl_id[0]}"))
-
-p = player.Player(tm)
-
-p.add_ani("idle_sqr", imgdata.idle_sqr_frames)
-p.add_ani("idle_tri", imgdata.idle_tri_frames)
-p.add_ani("idle_cir", imgdata.idle_cir_frames)
-
-p.add_ani("run_sqr", imgdata.run_sqr_frames)
-p.add_ani("run_tri", imgdata.run_tri_frames)
-p.add_ani("run_cir", imgdata.run_cir_frames)
-
-p.set_act("idle")
-p.type = "sqr"
-
-j_bf = 0
-_j_bf = 4
+pg.init()
 
 def lerp(v1, v2, t):
     return Vector2(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t)
 
-mode = 1
+class App:
+    def __init__(self) -> None:
+        self.screen = pg.display.set_mode((800, 800))
+        self.clock = pg.time.Clock()
+        self.last_t = time.time()
+        self.lvl_id = [1]
+        self.tm = copy.copy(eval(f"lvl_dat.lvl{self.lvl_id[0]}"))
+        self.mode = 1
+        self.player = player.Player(self)
 
-while True:
-    if mode == 1:
-        screen.fill((26, 22, 35))
+        self.player.add_ani("idle_sqr", imgdata.idle_sqr_frames)
+        self.player.add_ani("idle_tri", imgdata.idle_tri_frames)
+        self.player.add_ani("idle_cir", imgdata.idle_cir_frames)
 
-        dt = (time.time() - last_t) * 60
-        last_t = time.time()
+        self.player.add_ani("run_sqr", imgdata.run_sqr_frames)
+        self.player.add_ani("run_tri", imgdata.run_tri_frames)
+        self.player.add_ani("run_cir", imgdata.run_cir_frames)
 
-        j_bf -= 1
+        self.player.set_act("idle")
+        self.player.type = "sqr"
+        self.j_bf = 0
+        self._j_bf = 4
+    
+    def draw(self):
+        self.screen.fill((26, 22, 35))
+        self.player.draw(self.screen)
+        self.player.draw_body(self.screen)
+        self.tm.draw(self.screen)
+    
+    def update(self):
+        self.tm.update(self.player, self.dt)
+        keys = pg.key.get_pressed()
+        if keys[pg.K_a] and self.player.walled != -1:
+            self.player.vel = lerp(self.player.vel, Vector2(-5.2, self.player.vel.y), 0.4)
+            self.player.set_act("run")
+        if keys[pg.K_d] and self.player.walled != 1:
+            self.player.vel = lerp(self.player.vel, Vector2(5.2, self.player.vel.y), 0.4)
+            self.player.set_act("run")
+        if not keys[pg.K_a] and not keys[pg.K_d]:
+            self.player.set_act("idle")
         
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    j_bf = _j_bf
+        bds = list(self.player.body)
+        bds.append([self.player.hitbox, 0])
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] and p.walled != -1:
-            p.vel = lerp(p.vel, Vector2(-5.2, p.vel.y), 0.4)
-            p.set_act("run")
-        if keys[pygame.K_d] and p.walled != 1:
-            p.vel = lerp(p.vel, Vector2(5.2, p.vel.y), 0.4)
-            p.set_act("run")
-        if not keys[pygame.K_a] and not keys[pygame.K_d]:
-            p.set_act("idle")
+        self.player.move_x(self.dt)
+        self.tm.check_btn(bds)
+        self.player.collide_x(self.tm.origin, self.tm, self.lvl_id, self.tm.data.values())
 
-        bds = list(p.body)
-        bds.append([p.hitbox, 0])
+        bds = list(self.player.body)
+        bds.append([self.player.hitbox, 0])
 
-        p.move_x(dt)
-        tm.check_btn(bds)
-        p.collide_x(tm.origin, tm, lvl_id, tm.data.values())
+        self.player.move_y(self.dt)
+        self.tm.check_btn(bds)
+        self.player.collide_y(self.tm.origin, self.tm, self.lvl_id, self.tm.data.values())
 
-        bds = list(p.body)
-        bds.append([p.hitbox, 0])
+        self.player.update(self.j_bf)
 
-        p.move_y(dt)
-        tm.check_btn(bds)
-        p.collide_y(tm.origin, tm, lvl_id, tm.data.values())
-
-        p.update(j_bf)
-
-        for hb in tm.data.keys():
-            if tm.data[hb]["type"] == "air":
+        for hb in self.tm.data.keys():
+            if self.tm.data[hb]["type"] == "air":
                 continue
-            hit = tm.data[hb]["hitbox"]
-            pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(hit.x, hit.y, hit.w, hit.h))
+            hit = self.tm.data[hb]["hitbox"]
+            pg.draw.rect(self.screen, (255, 0, 0), pg.Rect(hit.x, hit.y, hit.w, hit.h))
 
-        tm.update(p, dt)
+    def input(self):
+        self.j_bf -= 1
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.j_bf = self._j_bf
 
-        p.draw(screen)
-        p.draw_body(screen)
-        tm.draw(screen)
+    def start(self):
+        pass
 
-        clock.tick(60)
-        pygame.display.update()
+    async def run(self):
+        self.start()
+        while True:
+            if self.mode == 1:
+                # self.dt = self.clock.tick(60)
+                self.dt = self.clock.tick(60)/20
+                self.input()
+                self.update()
+                self.draw()
+                pg.display.update()
+                await asyncio.sleep(0)
+
+    def set_lvl(self, new_lvl):
+        self.tm = new_lvl
+
+if __name__ == "__main__":
+    app = App()
+    asyncio.run(app.run())

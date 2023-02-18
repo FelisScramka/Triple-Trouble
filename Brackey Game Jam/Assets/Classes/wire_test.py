@@ -34,15 +34,19 @@ class Wire:
             endpoint_distance = abs(self.endpoint[0] - point_x)
             distance = min(startpoint_distance, endpoint_distance)
 
+            chunk_num = 5
             dist_to_mid = abs(self.points[mid_index][0] - point_x)
-            val2 = dist_to_mid**1
+            max_dist_to_mid = mid_index
+            step = max_dist_to_mid//chunk_num
+            some_val = dist_to_mid//step
+            
+            val2 = some_val**1
 
             if index == mid_index:
                 val2 = abs(self.points[mid_index][0] - self.points[mid_index-1][0] )
 
             val = 100 * (1 +(distance /(self.width / 2)))
             self.points[index][1] = val - val2
-            # try messing aroung with the **(102/100) to get a different curve
 
             index += 1
 

@@ -55,9 +55,7 @@ def create_lvl(img):
     lvl.addType("drcir", (0, 0, 255), imgdata.drcir, 1, tag = "drcir")
 
     lvl.addType("pt", (0, 255, 255), imgdata.pt, 1, tag = "pt")
-
     lvl.write()
-
     return lvl
 
 lvl1 = create_lvl(pygame.image.load("Assets/Maps/Lvl1.png"))

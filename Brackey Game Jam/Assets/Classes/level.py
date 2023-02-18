@@ -14,7 +14,7 @@ class Level(tilemap.Tilemap):
         #Format: [hitbox, targetx, targety]
         self.buttons = []
 
-        self.origin = Vector2()
+        self.origin = origin
 
         self.falling = {}
         
